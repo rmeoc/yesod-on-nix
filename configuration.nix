@@ -6,8 +6,9 @@ let
     name = "my-web-app-static";
   };
   stateDir = "/var/my-web-app";
+  clientSessionKeyName = "client-session";
   myWebAppConfigFile = pkgs.writeText "my-web-app-config" ''
-    client-session-key-path: "/run/keys/client-session"
+    client-session-key-path: "/run/keys/${clientSessionKeyName}"
     static-dir: "${staticDir}"
     generated-dir: "${stateDir}"
   '';
@@ -57,8 +58,8 @@ in
 
   systemd.services.my-web-app =
   { description = "my-web-app";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network.target" ];
+    after = [ "${clientSessionKeyName}-key.service" ];
+    wants = [ "${clientSessionKeyName}-key.service" ];
     serviceConfig =
       { User = "mywebsrv";
         Group = "mywebsrv";
