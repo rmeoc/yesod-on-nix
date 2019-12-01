@@ -1,6 +1,8 @@
 # Values formatted like "_env:YESOD_ENV_VAR_NAME:default_value" can be overridden by the specified environment variable.
 # See https://github.com/yesodweb/yesod/wiki/Configuration#overriding-configuration-values-with-environment-variables
 
+client-session-key-path:
+                "_env:YESOD_CLIENT_SESSION_KEY_PATH:config/client_session_key.aes"
 static-dir:     "_env:YESOD_STATIC_DIR:static"
 generated-dir:  "_env:YESOD_GENERATED_DIR:generated"
 host:           "_env:YESOD_HOST:*4" # any IPv4 host

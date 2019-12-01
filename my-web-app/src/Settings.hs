@@ -28,7 +28,9 @@ import           Yesod.Default.Util          (WidgetFileSettings,
 -- loaded from various sources: defaults, environment variables, config files,
 -- theoretically even a database.
 data AppSettings = AppSettings
-    { appStaticDir              :: String
+    { appClientSessionKeyPath
+    -- ^ Path to file containing the client session key.
+    , appStaticDir              :: String
     -- ^ Directory from which to serve static files.
     , appGeneratedDir           :: String
     -- ^ Directory from which to serve generated files.
@@ -74,6 +76,7 @@ instance FromJSON AppSettings where
 #else
                 False
 #endif
+        appClientSessionKeyPath   <- o .: "client-session-key-path"
         appStaticDir              <- o .: "static-dir"
         appGeneratedDir           <- o .: "generated-dir"
         appDatabaseConf           <- o .: "database"
