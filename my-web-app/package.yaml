@@ -42,6 +42,7 @@ dependencies:
 - case-insensitive
 - wai
 - foreign-store
+- clientsession
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.
@@ -72,6 +73,12 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - my-web-app
+    when:
+    - condition: flag(library-only)
+      buildable: false
+  generate-client-session-key:
+    main: main.hs
+    source-dirs: generate-client-session-key
     when:
     - condition: flag(library-only)
       buildable: false
