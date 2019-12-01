@@ -1,15 +1,10 @@
 { config, pkgs, ... }:
 
 let
-  staticDir = builtins.path {
-    path = ./my-web-app/static;
-    name = "my-web-app-static";
-  };
   stateDir = "/var/my-web-app";
   clientSessionKeyName = "client-session";
   myWebAppConfigFile = pkgs.writeText "my-web-app-config" ''
     client-session-key-path: "/run/keys/${clientSessionKeyName}"
-    static-dir: "${staticDir}"
     generated-dir: "${stateDir}"
   '';
 in
@@ -63,7 +58,7 @@ in
     serviceConfig =
       { User = "mywebsrv";
         Group = "mywebsrv";
-        ExecStart = "${pkgs.haskellPackages.my-web-app}/bin/my-web-app ${myWebAppConfigFile}";
+        ExecStart = "${pkgs.haskellPackages.my-web-app}/bin/my-web-app-launcher ${myWebAppConfigFile}";
         WorkingDirectory = stateDir;
       };
   };
