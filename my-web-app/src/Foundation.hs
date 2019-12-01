@@ -33,6 +33,7 @@ import qualified Data.Text.Encoding as TE
 data App = App
     { appSettings    :: AppSettings
     , appStatic      :: Static -- ^ Settings for static file serving.
+    , appGenerated   :: Static -- ^ Settings for generated file serving.
     , appConnPool    :: ConnectionPool -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
@@ -166,6 +167,7 @@ instance Yesod App where
     isAuthorized FaviconR _ = return Authorized
     isAuthorized RobotsR _ = return Authorized
     isAuthorized (StaticR _) _ = return Authorized
+    isAuthorized (GeneratedR _) _ = return Authorized
 
     -- the profile route requires that the user is authenticated, so we
     -- delegate to that function
@@ -182,12 +184,12 @@ instance Yesod App where
         -> Handler (Maybe (Either Text (Route App, [(Text, Text)])))
     addStaticContent ext mime content = do
         master <- getYesod
-        let staticDir = appStaticDir $ appSettings master
+        let generatedDir = appGeneratedDir $ appSettings master
         addStaticContentExternal
             minifym
             genFileName
-            staticDir
-            (StaticR . flip StaticRoute [])
+            generatedDir
+            (GeneratedR . flip StaticRoute [])
             ext
             mime
             content

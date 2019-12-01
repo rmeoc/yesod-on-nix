@@ -30,6 +30,8 @@ import           Yesod.Default.Util          (WidgetFileSettings,
 data AppSettings = AppSettings
     { appStaticDir              :: String
     -- ^ Directory from which to serve static files.
+    , appGeneratedDir           :: String
+    -- ^ Directory from which to serve generated files.
     , appDatabaseConf           :: PostgresConf
     -- ^ Configuration settings for accessing the database.
     , appRoot                   :: Maybe Text
@@ -73,6 +75,7 @@ instance FromJSON AppSettings where
                 False
 #endif
         appStaticDir              <- o .: "static-dir"
+        appGeneratedDir           <- o .: "generated-dir"
         appDatabaseConf           <- o .: "database"
         appRoot                   <- o .:? "approot"
         appHost                   <- fromString <$> o .: "host"
