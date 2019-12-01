@@ -25,6 +25,8 @@ import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import qualified Data.CaseInsensitive as CI
 import qualified Data.Text.Encoding as TE
+import qualified Data.ByteString as BS
+import qualified Web.ClientSession as CS
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -84,11 +86,14 @@ instance Yesod App where
     -- Store session data on the client in encrypted cookies,
     -- default session idle timeout is 120 minutes
     makeSessionBackend :: App -> IO (Maybe SessionBackend)
-    makeSessionBackend app = Just <$> defaultClientSessionBackend
-        120    -- timeout in minutes
-        clientSessionKeyPath
+    makeSessionBackend app = do
+        bs <- BS.readFile clientSessionKeyPath
+        key <- either throwString return $ CS.initKey bs
+        (getCachedDate, _closeDateCacher) <- clientSessionDateCacher timeoutInSeconds
+        return $ Just $ clientSessionBackend key getCachedDate
       where
         clientSessionKeyPath = appClientSessionKeyPath $ appSettings app
+        timeoutInSeconds = 2 * 60 * 60
 
     -- Yesod Middleware allows you to run code before and after each handler function.
     -- The defaultYesodMiddleware adds the response header "Vary: Accept, Accept-Language" and performs authorization checks.
