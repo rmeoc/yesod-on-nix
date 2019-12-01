@@ -2,7 +2,9 @@
 let 
   pkgs = import <nixpkgs> { };
 in 
-  pkgs.haskellPackages.developPackage {
-    root = ./.;
-    modifier = drv: pkgs.haskell.lib.dontHaddock (pkgs.haskell.lib.dontCheck drv);
-  }
+  pkgs.haskell.lib.overrideCabal 
+    (pkgs.haskellPackages.callCabal2nix "my-web-app" ./. { })
+    (drv: {
+      doCheck = false;
+      doHaddock = false;
+    })
