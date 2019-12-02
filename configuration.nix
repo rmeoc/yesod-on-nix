@@ -70,6 +70,7 @@ in
       createHome = true;
       useDefaultShell = true;
       group = "mywebsrv";
+      extraGroups = [ "keys" ];
       isSystemUser = true;
     };
   };
