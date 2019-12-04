@@ -24,6 +24,8 @@ import           Yesod.Default.Util          (WidgetFileSettings,
                                               widgetFileNoReload,
                                               widgetFileReload)
 
+import           Auth0                       (Auth0Settings)
+
 -- | Runtime settings to configure this application. These settings can be
 -- loaded from various sources: defaults, environment variables, config files,
 -- theoretically even a database.
@@ -36,6 +38,7 @@ data AppSettings = AppSettings
     -- ^ Directory from which to serve generated files.
     , appDatabaseConf           :: PostgresConf
     -- ^ Configuration settings for accessing the database.
+    , appAuth0Settings          :: Auth0Settings
     , appRoot                   :: Maybe Text
     -- ^ Base for all generated URLs. If @Nothing@, determined
     -- from the request headers.
@@ -80,6 +83,7 @@ instance FromJSON AppSettings where
         appStaticDir              <- o .: "static-dir"
         appGeneratedDir           <- o .: "generated-dir"
         appDatabaseConf           <- o .: "database"
+        appAuth0Settings         <- o .: "auth0"
         appRoot                   <- o .:? "approot"
         appHost                   <- fromString <$> o .: "host"
         appPort                   <- o .: "port"

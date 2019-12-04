@@ -2,10 +2,12 @@
 
 let
   stateDir = "/var/my-web-app";
-  clientSessionKeyName = "client-session";
   myWebAppConfigFile = pkgs.writeText "my-web-app-config" ''
-    client-session-key-path: "/run/keys/${clientSessionKeyName}"
+    client-session-key-path: "/run/keys/client-session"
     generated-dir: "${stateDir}"
+    auth0:
+      client-id:   ???
+      domain:      ???
   '';
 in
 {
@@ -53,13 +55,16 @@ in
 
   systemd.services.my-web-app =
   { description = "my-web-app";
-    wants = [ "postgresql.service" "${clientSessionKeyName}-key.service" ];
-    after = [ "postgresql.service" "${clientSessionKeyName}-key.service" ];
+    wants = [ "postgresql.service" "client-session-key.service" "auth0-client-secret-key.service" ];
+    after = [ "postgresql.service" "client-session-key.service" "auth0-client-secret-key.service" ];
     wantedBy = [ "multi-user.target" ];
+    script = ''
+      export YESOD_AUTH0_CLIENT_SECRET=$(cat /run/keys/auth0-client-secret)
+      ${pkgs.haskellPackages.my-web-app}/bin/my-web-app-launcher ${myWebAppConfigFile}
+    '';
     serviceConfig =
       { User = "mywebsrv";
         Group = "mywebsrv";
-        ExecStart = "${pkgs.haskellPackages.my-web-app}/bin/my-web-app-launcher ${myWebAppConfigFile}";
         WorkingDirectory = stateDir;
       };
   };

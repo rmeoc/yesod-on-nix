@@ -28,6 +28,9 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as BS
 import qualified Web.ClientSession as CS
 
+import Auth0                (auth0Plugin)
+
+
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
@@ -267,9 +270,13 @@ instance YesodAuth App where
 
     -- You can add other plugins like Google Email, email or OAuth here
     authPlugins :: App -> [AuthPlugin App]
-    authPlugins app = [authOpenId Claimed []] ++ extraAuthPlugins
+    authPlugins app =
+        [ authOpenId Claimed []
+        , auth0Plugin $ appAuth0Settings $ appSettings app
+        ] ++ extraAuthPlugins
+      where
         -- Enable authDummy login if enabled.
-        where extraAuthPlugins = [authDummy | appAuthDummyLogin $ appSettings app]
+        extraAuthPlugins = [authDummy | appAuthDummyLogin $ appSettings app]
 
 -- | Access function to determine if a user is logged in.
 isAuthenticated :: Handler AuthResult
