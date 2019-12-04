@@ -53,8 +53,9 @@ in
 
   systemd.services.my-web-app =
   { description = "my-web-app";
-    after = [ "${clientSessionKeyName}-key.service" ];
-    wants = [ "${clientSessionKeyName}-key.service" ];
+    wants = [ "postgresql.service" "${clientSessionKeyName}-key.service" ];
+    after = [ "postgresql.service" "${clientSessionKeyName}-key.service" ];
+    wantedBy = [ "multi-user.target" ];
     serviceConfig =
       { User = "mywebsrv";
         Group = "mywebsrv";
