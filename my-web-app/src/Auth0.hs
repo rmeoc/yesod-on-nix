@@ -48,7 +48,7 @@ auth0Plugin Auth0Settings {..}
         OAuth2
             { oauthClientId = stringOrUri # auth0ClientId
             , oauthClientSecret = auth0ClientSecret
-            , oauthOAuthorizeEndpoint = setDomain [uri|https://example.com/authorize|]
+            , oauthOAuthorizeEndpoint = setDomain [uri|https://example.com/authorize?scope=openid|]
             , oauthAccessTokenEndpoint = setDomain [uri|https://example.com/oauth/token|]
             , oauthCallback = Nothing
             }
