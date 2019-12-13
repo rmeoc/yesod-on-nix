@@ -24,6 +24,8 @@ import URI.ByteString.QQ            (uri)
 import Yesod.Auth                   (AuthPlugin, Creds(..), YesodAuth)
 import Yesod.Auth.OAuth2            (OAuth2(..), authOAuth2, idToken)
 
+import qualified Yesod.Auth.OAuth2.Exception as YesodOAuth2Exception
+
 
 data Auth0Settings = Auth0Settings
     { auth0ClientId     :: StringOrURI
@@ -52,7 +54,9 @@ auth0Plugin Auth0Settings {..}
             , oauthAccessTokenEndpoint = setDomain [uri|https://example.com/oauth/token|]
             , oauthCallback = Nothing
             }
-       (\_ token -> maybe (throwString "Did not receive id token") (getCredsFromIdToken . idtoken) (idToken token))
+       (\_ token -> maybe (throwIO $ YesodOAuth2Exception.GenericError pluginName "Did not receive id token")
+                          (getCredsFromIdToken . idtoken)
+                          (idToken token))
   where
     setDomain :: URIRef Absolute -> URIRef Absolute
     setDomain = authorityL . _Just . authorityHostL . hostBSL .~ encodeUtf8 auth0Domain
@@ -78,6 +82,10 @@ auth0Plugin Auth0Settings {..}
     getCredsFromIdToken :: Text -> IO (Creds m)
     getCredsFromIdToken x = do
         verificationResult <- runExceptT $ verifyIdToken x
-        claims <- either (throwString . show) return verificationResult
-        subject <- maybe (throwString "Id token has no subject claim") (return . review stringOrUri) (claims ^. claimSub)
+        claims <- either (throwIO . YesodOAuth2Exception.GenericError pluginName . ("Invalid id token: " <>) . show)
+                         return
+                         verificationResult
+        subject <- maybe (throwIO $ YesodOAuth2Exception.GenericError pluginName "Id token has no subject claim")
+                         (return . review stringOrUri)
+                         (claims ^. claimSub)
         return $ Creds pluginName subject []
